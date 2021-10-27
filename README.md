@@ -1,7 +1,7 @@
-### Getting Start to BTC Billionaire
+### Getting Start to be BTC Billionaire
 
 1. start docker compose to initiate db-application using `docker-compose up` at project root 
-> this command will take sometime if you don't have mssql docker image
+    > this command will take sometime if you don't have mssql docker image
 2. once db has start please wait until db service finish setting up and no more logs appear on the console
 3. run scripts `./scripts/initialize_db.sh` at project root in another terminal to initialize db data.
 4. run this command to start the application `sbt api run`
@@ -23,3 +23,13 @@
         "endDatetime": "2020-10-05T18:48:02+00:00"
     }'
     ```
+   
+---
+
+#### Improvement Plan
+1. Optimize DB Connection Pool
+2. Optimize Thread management for I/O bound task and CPU bound task
+3. Add index for datetime key 
+4. Create buffer to make cache update operation async or make it an Actor
+
+   

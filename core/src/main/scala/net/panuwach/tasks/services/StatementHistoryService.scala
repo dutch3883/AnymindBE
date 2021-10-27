@@ -50,9 +50,9 @@ class StatementHistoryService(recordRepository: RecordDBRepository, statementCac
     /* This is like for loop with FoldingState as parameter carrying each iteration
     *   Implementation Detail
     * 1.) First we calculate the latest price we can get from cache of the day before start datetime.
-    * 2.) We use the end of day before start DateTime as PinPoint to calculate price at starting date.
-    * 3.) We generate hourly bin with empty value and iterate through is records in the interval client request.
-    * 4.) We update hourly price with filter only those that would get effect by the iterating record.
+    * 2.) We use the end of day before startDateTime as PinPoint to calculate price at startDateTime.
+    * 3.) We generate hourly bin with empty value and iterate through records in the interval client request.
+    * 4.) We update hourly price with filter condition only those that would get effect by the iterating record.
     * 5.) At the end, there will be hourly bin after last record haven't been yet calculate, so we update those at the end.
     *  */
 

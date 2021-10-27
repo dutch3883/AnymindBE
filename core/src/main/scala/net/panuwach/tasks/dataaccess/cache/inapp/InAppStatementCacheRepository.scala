@@ -27,7 +27,7 @@ class InAppStatementCacheRepository(recordDBRepository: RecordDBRepository)(impl
   import org.joda.time.DateTimeZone
 
   DateTimeZone.setDefault(DateTimeZone.UTC)
-  var dateStatementMap: SortedMap[LocalDate, StatementCache] = Await.result(initializeCache(), initializeTimeOut)
+  @volatile var dateStatementMap: SortedMap[LocalDate, StatementCache] = Await.result(initializeCache(), initializeTimeOut)
 
   override def updateWithRecord(
       record: RecordInternal
