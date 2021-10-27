@@ -25,6 +25,8 @@ class StatementHistoryService(recordRepository: RecordDBRepository, statementCac
 
   private def buildHourlyStatement(start: DateTime, end: DateTime): Future[List[Statement]] = {
     // This method we get the latest state before the date as a checkpoint and building history from there
+    import org.joda.time.DateTimeZone
+    DateTimeZone.setDefault(DateTimeZone.UTC)
     for {
       previousDateStatement <- statementCache.getDateStatement(start.toLocalDate.minusDays(1))
       records               <- recordRepository.searchRecordInRange(roundDownDate(start), end)
@@ -39,27 +41,28 @@ class StatementHistoryService(recordRepository: RecordDBRepository, statementCac
         amount = startAmount,
         lastHour = start
       )
-      val finalState = between.foldLeft(initialFold)((state, record) => {
-        val recordDatetime = record.datetime
+      val finalState = between.foldLeft(initialFold)((prev, record) => {
+        val recordDatetime = roundUpHour(record.datetime)
         val updateFromLast = updateMap(
-          state.dateCache,
-          date => date.isBefore(recordDatetime) && date.isAfter(state.lastHour),
-          statement => Statement(statement.datetime, state.amount)
+          prev.dateCache,
+          date => date.isBefore(recordDatetime) && date.isAfter(prev.lastHour),
+          statement => Statement(statement.datetime, prev.amount)
         )
+
         val updateFromCurrent =
           updateMap(
             updateFromLast,
             _.isEqual(recordDatetime),
-            statement => Statement(statement.datetime, record.apply(state.amount))
+            statement => Statement(statement.datetime, record.apply(prev.amount))
           )
-        FoldingState(updateFromCurrent, record.apply(state.amount), recordDatetime)
+        FoldingState(updateFromCurrent, record.apply(prev.amount), recordDatetime)
       })
 
       updateMap(
         finalState.dateCache,
-        dateToCheck => records.lastOption.map(record => record.datetime.isAfter(dateToCheck)).getOrElse(true),
+        dateToCheck => dateToCheck.isAfter(finalState.lastHour),
         statement => Statement(statement.datetime, finalState.amount)
-      ).map(_._2).toList
+      ).values.toList
     }
   }
 

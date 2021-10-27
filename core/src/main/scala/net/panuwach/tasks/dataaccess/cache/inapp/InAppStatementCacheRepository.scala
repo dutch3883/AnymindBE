@@ -24,6 +24,9 @@ class InAppStatementCacheRepository(recordDBRepository: RecordDBRepository)(impl
     with LazyLogging {
   import InAppStatementCacheRepository._
 
+  import org.joda.time.DateTimeZone
+
+  DateTimeZone.setDefault(DateTimeZone.UTC)
   var dateStatementMap: SortedMap[LocalDate, StatementCache] = Await.result(initializeCache(), initializeTimeOut)
 
   override def updateWithRecord(
