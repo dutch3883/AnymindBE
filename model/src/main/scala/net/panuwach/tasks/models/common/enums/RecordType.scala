@@ -11,6 +11,7 @@ sealed abstract class RecordType(val i: Int) extends EnumEntry {
 
 object RecordTypes extends Enum[RecordType] {
   override def values: IndexedSeq[RecordType] = findValues.toIndexedSeq
+  lazy val valueMap = values.map(recordType => recordType.i -> recordType).toMap
   case object Unknown extends RecordType(0)
   case object Deposit extends RecordType(1)
   case object Withdraw extends RecordType(2)

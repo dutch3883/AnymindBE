@@ -1,4 +1,4 @@
-package net.panuwach.tasks.dataaccess.model
+package net.panuwach.tasks.dataaccess.db.model
 
 import java.util.UUID
 

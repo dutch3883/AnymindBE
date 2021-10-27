@@ -8,17 +8,17 @@ import doobie.ExecutionContexts
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
 import net.panuwach.tasks.dataaccess.db.{DBToInternalMapper, RecordDBRepository}
-import net.panuwach.tasks.dataaccess.model.RecordDB
+import net.panuwach.tasks.dataaccess.db.model.RecordDB
 import net.panuwach.tasks.models.internal.RecordInternal
 import org.joda.time.DateTime
 
 import scala.concurrent.Future
-class MSSQLRecordDBRepository extends RecordDBRepository {
+class MSSQLRecordDBRepository extends RecordDBRepository{
   import net.panuwach.tasks.dataaccess.db.helper.DBParsingHelper._
 
-  lazy val transactor: Resource[IO, HikariTransactor[IO]] =
+  val transactor: Resource[IO, HikariTransactor[IO]] =
     for {
-      ce <- ExecutionContexts.fixedThreadPool[IO](32)
+      ce <- ExecutionContexts.fixedThreadPool[IO](1)
       xa <- HikariTransactor.newHikariTransactor[IO](
               "com.microsoft.sqlserver.jdbc.SQLServerDriver",
               "jdbc:sqlserver://localhost:1433;database=APPDB",
@@ -51,11 +51,10 @@ class MSSQLRecordDBRepository extends RecordDBRepository {
     val transactionResult = transactor.use { xa =>
       for {
         record <-
-          sql"select record_id,record_type,datetime,amount from APPDB.dbo.records where datetime < $endDateTime and datetime > $startDateTime"
+          sql"select record_id,record_type,datetime,amount from APPDB.dbo.records where datetime <= $endDateTime and datetime >= $startDateTime"
             .query[RecordDB]
             .to[List]
             .transact(xa)
-        _ <- IO(println(record))
       } yield record.map(DBToInternalMapper.mapRecord)
     }
 
@@ -69,7 +68,6 @@ class MSSQLRecordDBRepository extends RecordDBRepository {
                     .query[RecordDB]
                     .to[List]
                     .transact(xa)
-        _ <- IO(println(record))
       } yield record.map(DBToInternalMapper.mapRecord)
     }
 

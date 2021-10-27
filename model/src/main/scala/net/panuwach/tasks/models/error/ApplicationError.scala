@@ -1,3 +1,3 @@
-package net.panuwach.tasks.models.error class ApplicationError {
+package net.panuwach.tasks.models.error
 
-}
+case class ApplicationError(message: String)

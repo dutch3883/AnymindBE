@@ -1,5 +1,5 @@
 package net.panuwach.tasks.models.common
 
-import akka.http.scaladsl.model.DateTime
+import org.joda.time.DateTime
 
-case class Transaction (datetime: DateTime,amount: Double)
+case class Record(datetime: DateTime, amount: Double)
