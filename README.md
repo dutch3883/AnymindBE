@@ -1,6 +1,7 @@
 ### Getting Start to BTC Billionaire
 
-1. start docker compose to initiate db-application using `docker-compose up` at project root
+1. start docker compose to initiate db-application using `docker-compose up` at project root 
+> this command will take sometime if you don't have mssql docker image
 2. once db has start please wait until db service finish setting up and no more logs appear on the console
 3. run scripts `./scripts/initialize_db.sh` at project root in another terminal to initialize db data.
 4. run this command to start the application `sbt api run`
@@ -13,7 +14,7 @@
         "amount": 20
     }'
     ```
-6. run this command to query history of application
+6. run this command to query history of application (adjust datetime as you like)
     ```
     curl --location --request POST 'http://localhost:8080/api/history' \
     --header 'Content-Type: application/json' \
