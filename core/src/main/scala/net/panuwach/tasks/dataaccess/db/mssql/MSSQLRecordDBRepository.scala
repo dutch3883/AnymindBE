@@ -51,7 +51,7 @@ class MSSQLRecordDBRepository extends RecordDBRepository{
     val transactionResult = transactor.use { xa =>
       for {
         record <-
-          sql"select record_id,record_type,datetime,amount from APPDB.dbo.records where datetime <= $endDateTime and datetime >= $startDateTime"
+          sql"select record_id,record_type,datetime,amount from APPDB.dbo.records where datetime <= $endDateTime and datetime >= $startDateTime order by datetime ASC"
             .query[RecordDB]
             .to[List]
             .transact(xa)
@@ -64,7 +64,7 @@ class MSSQLRecordDBRepository extends RecordDBRepository{
   def getAllRecords(): Future[Seq[RecordInternal]] = {
     val transactionResult = transactor.use { xa =>
       for {
-        record <- sql"select record_id,record_type,datetime,amount from APPDB.dbo.records "
+        record <- sql"select record_id,record_type,datetime,amount from APPDB.dbo.records order by datetime ASC"
                     .query[RecordDB]
                     .to[List]
                     .transact(xa)

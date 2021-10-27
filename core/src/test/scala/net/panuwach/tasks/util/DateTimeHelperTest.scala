@@ -10,7 +10,7 @@ class DateTimeHelperTest extends TestHelper with DateTimeHelper {
       "calculate non-rounded hour" in {
         val start  = DateTime.parse("2021-10-25T18:22:00+00:00")
         val end    = DateTime.parse("2021-10-25T21:54:00+00:00")
-        val actual = buildHourlyBreakdown(start, end)
+        val actual = buildHourlyBreakdownBetween(start, end)
         val expect = Seq(
           "2021-10-25T18:00:00.000Z",
           "2021-10-25T19:00:00.000Z",
@@ -23,7 +23,7 @@ class DateTimeHelperTest extends TestHelper with DateTimeHelper {
       "calculate rounded hour" in {
         val start  = DateTime.parse("2021-10-25T18:00:00+00:00")
         val end    = DateTime.parse("2021-10-25T21:00:00+00:00")
-        val actual = buildHourlyBreakdown(start, end)
+        val actual = buildHourlyBreakdownBetween(start, end)
         val expect = Seq(
           "2021-10-25T18:00:00.000Z",
           "2021-10-25T19:00:00.000Z",
@@ -36,7 +36,7 @@ class DateTimeHelperTest extends TestHelper with DateTimeHelper {
       "calculate over midnight with timezone" in {
         val start  = DateTime.parse("2021-10-25T22:01:00+00:00")
         val end    = DateTime.parse("2021-10-26T03:33:00+02:00")
-        val actual = buildHourlyBreakdown(start, end)
+        val actual = buildHourlyBreakdownBetween(start, end)
         val expect = Seq(
           "2021-10-25T22:00:00.000Z",
           "2021-10-25T23:00:00.000Z",

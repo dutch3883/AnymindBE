@@ -48,8 +48,8 @@ class InAppStatementCacheRepository(recordDBRepository: RecordDBRepository)(impl
       case Some(state) => Future.successful(state)
       case None =>
         dateStatementMap.lastOption match {
-          case Some(last) if last._1.isBefore(date) => Future.successful(last._2)
-          case _                                    => Future.successful(StatementCache(InitialAmount))
+          case Some(last) if date.isAfter(last._1) => Future.successful(last._2)
+          case _ => Future.successful(StatementCache(InitialAmount))
         }
     }
   }

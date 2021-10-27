@@ -29,7 +29,7 @@ class StatementHistoryService(recordRepository: RecordDBRepository, statementCac
       previousDateStatement <- statementCache.getDateStatement(start.toLocalDate.minusDays(1))
       records               <- recordRepository.searchRecordInRange(roundDownDate(start), end)
     } yield {
-      val hourlyBreakdown = buildHourlyBreakdown(start, end).map(datetime => datetime -> Statement(datetime, 0))
+      val hourlyBreakdown = buildHourlyBreakdownBetween(start, end).map(datetime => datetime -> Statement(datetime, 0))
       val (before, between) = records.partition({ record =>
         record.datetime.isBefore(start) || record.datetime.isEqual(start)
       })
@@ -44,10 +44,14 @@ class StatementHistoryService(recordRepository: RecordDBRepository, statementCac
         val updateFromLast = updateMap(
           state.dateCache,
           date => date.isBefore(recordDatetime) && date.isAfter(state.lastHour),
-          Statement(recordDatetime, state.amount)
+          statement => Statement(statement.datetime, state.amount)
         )
         val updateFromCurrent =
-          updateMap(updateFromLast, date => date.isEqual(recordDatetime), Statement(recordDatetime, state.amount))
+          updateMap(
+            updateFromLast,
+            _.isEqual(recordDatetime),
+            statement => Statement(statement.datetime, record.apply(state.amount))
+          )
         FoldingState(updateFromCurrent, record.apply(state.amount), recordDatetime)
       })
       finalState.dateCache.values.toList
@@ -57,9 +61,11 @@ class StatementHistoryService(recordRepository: RecordDBRepository, statementCac
   private def updateMap(
       dateCache: SortedMap[DateTime, Statement],
       predicate: DateTime => Boolean,
-      updateValue: Statement
+      fUpdate: Statement => Statement
   ): SortedMap[DateTime, Statement] = {
-    dateCache ++ dateCache.collect { case (datetime, _) if predicate(datetime) => datetime -> updateValue }
+    dateCache ++ dateCache.collect {
+      case (datetime, statement) if predicate(datetime) => datetime -> fUpdate(statement)
+    }
   }
 
   private case class FoldingState(dateCache: SortedMap[DateTime, Statement], amount: Double, lastHour: DateTime)

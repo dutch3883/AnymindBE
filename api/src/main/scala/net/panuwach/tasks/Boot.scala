@@ -10,7 +10,6 @@ import net.panuwach.tasks.facades.{AddRecordFacade, ViewHistoryFacade}
 import net.panuwach.tasks.rest.ServiceRoutes
 import net.panuwach.tasks.services.{RecordService, StatementHistoryService}
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.util.Failure
 import scala.util.Success
 
@@ -18,13 +17,14 @@ object Boot extends App {
 
   def boot(): Unit = {
     val rootBehavior = Behaviors.setup[Nothing] { context =>
+      val ec = context.executionContext
       val recordDBRepository      = new MSSQLRecordDBRepository
-      val statementCache          = new InAppStatementCacheRepository(recordDBRepository)
-      val recordService           = new RecordService(recordDBRepository, statementCache)
-      val statementHistoryService = new StatementHistoryService(recordDBRepository, statementCache)
-      val addRecordFacade         = new AddRecordFacade(recordService)
-      val viewHistoryFacade       = new ViewHistoryFacade(statementHistoryService)
-      val routes                  = new ServiceRoutes(addRecordFacade, viewHistoryFacade)
+      val statementCache          = new InAppStatementCacheRepository(recordDBRepository)(ec)
+      val recordService           = new RecordService(recordDBRepository, statementCache)(ec)
+      val statementHistoryService = new StatementHistoryService(recordDBRepository, statementCache)(ec)
+      val addRecordFacade         = new AddRecordFacade(recordService)(ec)
+      val viewHistoryFacade       = new ViewHistoryFacade(statementHistoryService)(ec)
+      val routes                  = new ServiceRoutes(addRecordFacade, viewHistoryFacade)(ec)
       startHttpServer(routes.routes)(context.system)
       Behaviors.empty
     }
