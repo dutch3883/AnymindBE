@@ -4,6 +4,7 @@ import java.util.UUID
 
 import cats.effect.unsafe.implicits.global
 import cats.effect.{IO, Resource}
+import com.typesafe.scalalogging.LazyLogging
 import doobie.ExecutionContexts
 import doobie.hikari.HikariTransactor
 import doobie.implicits._
@@ -13,7 +14,7 @@ import net.panuwach.tasks.models.internal.RecordInternal
 import org.joda.time.DateTime
 
 import scala.concurrent.Future
-class MSSQLRecordDBRepository extends RecordDBRepository{
+class MSSQLRecordDBRepository extends RecordDBRepository with LazyLogging{
   import net.panuwach.tasks.dataaccess.db.helper.DBParsingHelper._
 
   val transactor: Resource[IO, HikariTransactor[IO]] =

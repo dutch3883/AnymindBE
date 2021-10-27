@@ -54,7 +54,12 @@ class StatementHistoryService(recordRepository: RecordDBRepository, statementCac
           )
         FoldingState(updateFromCurrent, record.apply(state.amount), recordDatetime)
       })
-      finalState.dateCache.values.toList
+
+      updateMap(
+        finalState.dateCache,
+        dateToCheck => records.lastOption.map(record => record.datetime.isAfter(dateToCheck)).getOrElse(true),
+        statement => Statement(statement.datetime, finalState.amount)
+      ).map(_._2).toList
     }
   }
 

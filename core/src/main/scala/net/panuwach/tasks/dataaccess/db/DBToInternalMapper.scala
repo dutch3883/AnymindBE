@@ -10,7 +10,7 @@ object DBToInternalMapper {
     RecordInternal(
       recordType = RecordTypes.valueMap(recordDB.recordType),
       datetime = recordDB.datetime,
-      amount = recordDB.recordType
+      amount = recordDB.amount
     )
   }
 }
