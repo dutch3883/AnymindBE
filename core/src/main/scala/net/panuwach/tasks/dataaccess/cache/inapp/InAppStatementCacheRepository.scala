@@ -27,17 +27,19 @@ class InAppStatementCacheRepository(recordDBRepository: RecordDBRepository)(impl
   import org.joda.time.DateTimeZone
 
   DateTimeZone.setDefault(DateTimeZone.UTC)
-  @volatile var dateStatementMap: SortedMap[LocalDate, StatementCache] = Await.result(initializeCache(), initializeTimeOut)
+  var dateStatementMap: SortedMap[LocalDate, StatementCache] = Await.result(initializeCache(), initializeTimeOut)
 
   override def updateWithRecord(
       record: RecordInternal
   ): Future[Unit] = {
-    val stateToBeUpdate = dateStatementMap.collect {
-      case (date, StatementCache(amount))
+    dateStatementMap.synchronized {
+      val stateToBeUpdate = dateStatementMap.collect {
+        case (date, StatementCache(amount))
           if date.isEqual(record.datetime.toLocalDate) || date.isAfter(record.datetime.toLocalDate) =>
-        date -> StatementCache(record.apply(amount))
+          date -> StatementCache(record.apply(amount))
+      }
+      dateStatementMap = dateStatementMap ++ stateToBeUpdate
     }
-    dateStatementMap = dateStatementMap ++ stateToBeUpdate
     Future.successful(())
   }
 
